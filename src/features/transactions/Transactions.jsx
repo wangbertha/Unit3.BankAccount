@@ -1,15 +1,20 @@
 import { useState } from "react";
 
 import "./transactions.scss";
+import { useDispatch, useSelector } from "react-redux";
+import { selectBalance } from "./transactionsSlice";
+import { withdrawal, deposit, transfer } from "./transactionsSlice";
 
 /**
  * Allows users to deposit to, withdraw from, and transfer money from their account.
  */
 export default function Transactions() {
   // TODO: Get the balance from the Redux store using the useSelector hook
-  const balance = 0;
+  const balance = useSelector(selectBalance);
 
   const [amountStr, setAmountStr] = useState("0.00");
+  const [recipient, setRecipient] = useState("");
+  const dispatch = useDispatch();
 
   /** Dispatches a transaction action based on the form submission. */
   const onTransaction = (e) => {
@@ -22,6 +27,20 @@ export default function Transactions() {
     const amount = +amountStr;
 
     // TODO: Dispatch the appropriate transaction action based on `action`
+    if (action === "transfer") {
+      // The `transfer` action is dispatched with a payload containing
+      // the amount and the recipient.
+      dispatch(transfer({ amount, recipient }));
+    }
+    else if (action === "withdraw") {
+      dispatch(withdrawal({ amount }))
+    }
+    else if (action === "deposit") {
+      dispatch(deposit({ amount }))
+    }
+
+    setAmountStr('0.00');
+    setRecipient('');
   };
 
   return (
@@ -54,7 +73,12 @@ export default function Transactions() {
         <div className="form-row">
           <label>
             Transfer to
-            <input type="text" placeholder="Recipient Name" name="recipient" />
+            <input
+              placeholder="Recipient Name"
+              name="recipient"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+            />
           </label>
           <button name="transfer">Transfer</button>
         </div>
